@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>HW4</title>
+    <style>
+        p{
+            font-weight:bold;
+        }
+        body{
+            margin-top:100px;
+        }
+    </style>
+    <script type="text/javascript">
+        var jsondoc;
+        function fillform(what)
+        {
+            var URL = what.URL.value;
+            function openJSON(url)
+            {
+                var jsonrequest=new XMLHttpRequest();
+                jsonrequest.overrideMimeType('application/json');
+                jsonrequest.open("GET", url, false);
+                try
+                {
+                    jsonrequest.send();
+                }
+                catch(error)
+                {
+                    window.alert("Invalid JSON File");
+                    return 0;
+                }
+               try
+               {
+                   jsondoc = JSON.parse(jsonrequest.responseText);
+               }
+               catch(error)
+               {
+                    alert("File is Empty");
+               }
+               return jsondoc;
+            }
+            jsondoc =openJSON(URL);
+            flag=0;
+            for (z in jsondoc.Mainline.Table)
+            {
+                if (z == "Row")
+                {
+                    flag=1;
+                }
+            }
+            if (flag==0)
+            {
+                alert("No entries to display");
+                return 0;
+            }
+            jsondoc.onload=makeHTML(jsondoc);
+            jsondoc = window.open("", "Homework4", "height=600,width=1100");
+            jsondoc.document.write(htext);
+            jsondoc.document.close();
+        }
+        function makeHTML(jsondoc)
+        {
+            htext="<html><head><title>Result</title></head><body>";
+            htext+="<table border='2'>";
+            htext+="<tr>";
+            var building_list=jsondoc.Mainline.Table.Header.Data;
+            var table_headers=Object.keys(building_list);
+            for(i=0;i<table_headers.length;i++)
+            {
+                heading=building_list[i];
+                htext+="<th>"+heading+"</th>"
+            }
+            htext+="</tr>";
+            var building_data = jsondoc.Mainline.Table.Row;
+            for(i=0;i<building_data.length;i++)
+            {
+                var data = building_data[i];
+                htext+="<tr>";
+                var dataKeys = Object.keys(data);
+                for (j=0;j<dataKeys.length;j++)
+                {
+                    head_name = dataKeys[j];
+                    if(head_name === "HomePage")
+                    {
+                        htext+= "<td><a href='"+ data[head_name]+"'/>"+ data[head_name]+"</td>";
+                    }
+                    else if(head_name === "Logo")
+                    {
+                        htext+= "<td><img src='"+ data[head_name]+"'height='250' width='250'></td>";
+                    }
+                    else if(head_name === "Hubs")
+                    {
+                        htext+="<td><ul>";
+                        HubData = data[head_name]["Hub"];
+                        var flag=true;
+                        for(bkey in HubData)
+                        {
+                            if (flag==true)
+                            {
+                                htext+= "<li style="text-align:center;><b>"+HubData[bkey]+"</b></li>";
+                                flag=false;
+                            }
+                            else
+                            {
+                                htext+= "<li style="text-align:center;">"+HubData[bkey]+"</li>";
+                            }
+                        }
+                        htext+="</ul></td>";
+                    }
+                    else
+                    {
+                        htext+= "<td>"+data[head_name]+"</td>";
+                    }
+                }
+                htext+="</tr>";
+            }
+            htext+="</table>";
+            htext+= "</bo" + "<dy> </html>";
+        }
+    </script>
+</head>
+<body>
+    <center>
+        <p>Enter URL for list of tallest buildings JSON file</p>
+        <form name="hw4form" id="buildings" method="GET">
+        <input type="text" name="URL" maxlength="255" size="25"></input>
+        <br>
+        <br>
+        <input type="submit" name="submit" value="Submit Query" onClick="fillform(this.form)"></input>
+        </form>
+    </center>
+</body>
+</html>
+        
